@@ -4,7 +4,10 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
@@ -23,6 +26,11 @@ public class Robot extends TimedRobot {
 
   private RobotContainer m_robotContainer;
   TalonFX motor = new TalonFX(1);
+  Joystick stick = new Joystick(0);
+
+
+  DigitalInput magSwitch = new DigitalInput(9);
+
   /**
    * This function is run when the robot is first started up and should be used for any
    * initialization code.
@@ -39,6 +47,9 @@ public class Robot extends TimedRobot {
         motor.configPeakOutputReverse(-1);
         motor.configVoltageCompSaturation(10);
         motor.enableVoltageCompensation(true);
+
+    SmartDashboard.putBoolean("safety", true);
+
   }
 
   /**
@@ -55,6 +66,8 @@ public class Robot extends TimedRobot {
     // and running subsystem periodic() methods.  This must be called from the robot's periodic
     // block in order for anything in the Command-based framework to work.
     CommandScheduler.getInstance().run();
+    SmartDashboard.putBoolean("magSwitch", magSwitch.get());
+
   }
 
   /** This function is called once each time the robot enters Disabled mode. */
@@ -93,8 +106,15 @@ public class Robot extends TimedRobot {
   /** This function is called periodically during operator control. */
   @Override
   public void teleopPeriodic() {
-    
+    if (!SmartDashboard.getBoolean("safety", true)) return;
+
+
+    if (!magSwitch.get()){
     motor.set(ControlMode.PercentOutput,10);
+    }else{
+      motor.set(ControlMode.PercentOutput,0);
+    }
+
   }
 
   @Override
